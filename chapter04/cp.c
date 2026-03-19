@@ -2,7 +2,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
-
+#include <unistd.h>
 
 #define BUF_SIZE 1024
 
@@ -30,6 +30,26 @@ int main(int argc, char *argv[]) {
   if (outputFd == -1) {
     exit(EXIT_FAILURE);
   }
+
+  int hole_size = 0;
+
+  while ((numread = read(inputFd, buf, BUF_SIZE)) > 0) {
+    for (int i = 0; i < numread; i++) {
+      if (buf[i] == '\0')
+        hole_size++;
+      else if (hole_size > 0) {
+        lseek(inputFd, hole_size, SEEK_CUR);
+        hole_size = 0;
+      }
+      else
+        write(outputFd, buf+i, 1);
+    }
+  }
+  if (-1 == close(inputFd)) {
+    exit(EXIT_FAILURE);
+  }
+  if (-1 == close(outputFd)){
+    exit(EXIT_FAILURE);
+  }
   exit(EXIT_SUCCESS);
 }
-
