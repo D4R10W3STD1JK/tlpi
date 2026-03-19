@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
       if (buf[i] == '\0')
         hole_size++;
       else if (hole_size > 0) {
-        lseek(inputFd, hole_size, SEEK_CUR);
+        lseek(outputFd, hole_size, SEEK_CUR);
         hole_size = 0;
       }
       else
